@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Zone, SimulationResult } from '@/lib/types'
-import { calculateMockAQI, getAQICategory, simulateReduction } from '@/lib/mock-data'
+import { SimulationResult } from '@/lib/types'
+import { calculateMockAQI, simulateReduction } from '@/lib/mock-data'
+import { getZoneById } from '@/lib/db/repository'
+import { getSupabaseServerClient } from '@/lib/supabase/server'
 
 /**
  * POST /api/simulation/run
@@ -9,7 +11,8 @@ import { calculateMockAQI, getAQICategory, simulateReduction } from '@/lib/mock-
  * 
  * Request body:
  * {
- *   zone: Zone object,
+ *   zone_id: string,
+ *   scenario_name?: string,
  *   vehicle_reduction_percentage: number (0-100),
  *   green_cover_increase: number (0-100),
  *   traffic_rerouting_factor: number (0-1)
@@ -29,22 +32,29 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const {
-      zone,
+      zone_id,
+      scenario_name,
       vehicle_reduction_percentage = 0,
       green_cover_increase = 0,
       traffic_rerouting_factor = 0,
     } = body as {
-      zone: Zone
+      zone_id: string
+      scenario_name?: string
       vehicle_reduction_percentage: number
       green_cover_increase: number
       traffic_rerouting_factor: number
     }
 
-    if (!zone || !zone.id) {
+    if (!zone_id) {
       return NextResponse.json(
-        { error: 'Invalid zone data provided' },
+        { error: 'zone_id is required' },
         { status: 400 }
       )
+    }
+
+    const zone = await getZoneById(zone_id)
+    if (!zone) {
+      return NextResponse.json({ error: 'Zone not found' }, { status: 404 })
     }
 
     // Validate input ranges
@@ -122,6 +132,36 @@ export async function POST(request: NextRequest) {
       recommendation,
       timestamp: new Date().toISOString(),
     }
+
+    const supabase = getSupabaseServerClient()
+    const { data: scenario, error: scenarioError } = await supabase
+      .from('simulation_scenarios')
+      .insert({
+        zone_id: zone.id,
+        name: scenario_name?.trim() || `Scenario ${new Date().toLocaleString('en-US')}`,
+        vehicle_reduction_percentage,
+        green_cover_increase,
+        traffic_rerouting_factor,
+      })
+      .select('id')
+      .single()
+
+    if (scenarioError) throw scenarioError
+
+    const { error: resultError } = await supabase.from('simulation_results').insert({
+      scenario_id: scenario.id,
+      zone_id: zone.id,
+      before_aqi: result.before_aqi,
+      after_aqi: result.after_aqi,
+      delta: result.delta,
+      delta_percentage: result.delta_percentage,
+      explanation: result.explanation,
+      recommendation: result.recommendation,
+    })
+
+    if (resultError) throw resultError
+
+    result.scenario_id = scenario.id
 
     return NextResponse.json(result)
   } catch (error) {

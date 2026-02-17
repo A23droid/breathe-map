@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { mockZones, generateMockAQIEstimates, generateMockClusters } from '@/lib/mock-data'
+import { getClustersFromEstimates, getLatestAQIForZones, listZones } from '@/lib/db/repository'
 
 /**
  * GET /api/analysis/clusters
@@ -12,18 +12,18 @@ import { mockZones, generateMockAQIEstimates, generateMockClusters } from '@/lib
  */
 export async function GET() {
   try {
-    // Generate current estimates for all zones
-    const estimates = generateMockAQIEstimates()
-
-    // Generate clusters based on current mock data
-    const clusters = generateMockClusters(estimates)
+    const zones = await listZones()
+    const estimates = await getLatestAQIForZones(zones)
+    const clusters = getClustersFromEstimates(zones, estimates)
+    const zoneLookup = Object.fromEntries(zones.map((zone) => [zone.id, zone.name]))
 
     const response = {
       data: clusters,
-      total_zones: mockZones.length,
+      zone_lookup: zoneLookup,
+      total_zones: zones.length,
       total_clusters: clusters.length,
       disclaimer:
-        'EXPLORATORY CLUSTERING: Zone groupings are based on mock AQI calculations and land use types. Results are for educational purposes only and do not represent validated environmental clusters.',
+        'EXPLORATORY CLUSTERING: Zone groupings are based on deterministic AQI estimates and land use. Results are for educational use only.',
       timestamp: new Date().toISOString(),
     }
 

@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Zone, AQIEstimate } from '@/lib/types'
-import {
-  calculateMockAQI,
-  getAQICategory,
-  getFeatureContributions,
-} from '@/lib/mock-data'
+import { getZoneById, storeAQIEstimate } from '@/lib/db/repository'
 
 /**
  * POST /api/aqi/estimate
- * Estimates AQI for a given zone using mock calculation
+ * Estimates AQI for a given zone using deterministic model and stores result
  * 
  * Request body:
  * {
@@ -27,34 +22,21 @@ import {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { zone } = body as { zone: Zone }
+    const { zone_id } = body as { zone_id: string }
 
-    if (!zone || !zone.id) {
+    if (!zone_id) {
       return NextResponse.json(
-        { error: 'Invalid zone data provided' },
+        { error: 'zone_id is required' },
         { status: 400 }
       )
     }
 
-    // Calculate mock AQI using deterministic formula
-    const aqi = calculateMockAQI(zone)
-    const category = getAQICategory(aqi)
-    const contributions = getFeatureContributions(zone)
-
-    const estimate: AQIEstimate = {
-      zone_id: zone.id,
-      estimated_aqi: aqi,
-      category,
-      feature_contributions: contributions,
-      assumptions: `AQI estimation based on mock weighted factors:
-      • Traffic density (40%): ${zone.traffic_density}%
-      • Population density (20%): ${zone.population_density}%
-      • Road network length (20%): ${zone.road_length} km
-      • Land use type (20%): ${zone.land_use_type}
-      
-      DISCLAIMER: This is a simplified educational model. Real AQI requires calibrated sensors and atmospheric data. Results are estimates only.`,
-      timestamp: new Date().toISOString(),
+    const zone = await getZoneById(zone_id)
+    if (!zone) {
+      return NextResponse.json({ error: 'Zone not found' }, { status: 404 })
     }
+
+    const estimate = await storeAQIEstimate(zone)
 
     return NextResponse.json(estimate)
   } catch (error) {

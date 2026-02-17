@@ -1,26 +1,42 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { NavBar } from '@/components/nav-bar'
 import { DisclaimerBanner } from '@/components/disclaimer-banner'
 import { FooterDisclaimer } from '@/components/footer-disclaimer'
 import { AQIBadge } from '@/components/aqi-badge'
-import { mockZones, calculateMockAQI, simulateReduction, getAQICategory } from '@/lib/mock-data'
 import { Zone, SimulationResult } from '@/lib/types'
 import { formatPercentChange } from '@/lib/utils'
 
 export default function SimulationPage() {
+  const [zones, setZones] = useState<Zone[]>([])
   const [selectedZone, setSelectedZone] = useState<Zone | null>(null)
   const [vehicleReduction, setVehicleReduction] = useState(0)
   const [greenIncrease, setGreenIncrease] = useState(0)
   const [reroutingFactor, setReroutingFactor] = useState(0)
   const [result, setResult] = useState<SimulationResult | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isZoneLoading, setIsZoneLoading] = useState(true)
 
   useEffect(() => {
-    if (mockZones.length > 0) {
-      setSelectedZone(mockZones[0])
+    const loadZones = async () => {
+      try {
+        const response = await fetch('/api/zones', { cache: 'no-store' })
+        const data = await response.json()
+        const loadedZones = (data.zones ?? []) as Zone[]
+        setZones(loadedZones)
+        if (loadedZones.length > 0) {
+          setSelectedZone(loadedZones[0])
+        }
+      } catch (error) {
+        console.error('Failed to load zones for simulation:', error)
+      } finally {
+        setIsZoneLoading(false)
+      }
     }
+
+    void loadZones()
   }, [])
 
   const handleSimulate = async () => {
@@ -32,7 +48,8 @@ export default function SimulationPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          zone: selectedZone,
+          zone_id: selectedZone.id,
+          scenario_name: `Simulation for ${selectedZone.name}`,
           vehicle_reduction_percentage: vehicleReduction,
           green_cover_increase: greenIncrease,
           traffic_rerouting_factor: reroutingFactor,
@@ -56,8 +73,27 @@ export default function SimulationPage() {
     setResult(null)
   }
 
-  if (!selectedZone) {
+  if (isZoneLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center">Loading...</div>
+  }
+
+  if (!selectedZone) {
+    return (
+      <div className="min-h-screen bg-background">
+        <NavBar />
+        <DisclaimerBanner />
+        <main className="max-w-3xl mx-auto px-4 py-12 text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-3">No zones available</h1>
+          <p className="text-muted-foreground mb-6">Create a zone first to run scenario simulations.</p>
+          <Link
+            href="/zones/new"
+            className="inline-block px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-semibold"
+          >
+            Create Zone
+          </Link>
+        </main>
+      </div>
+    )
   }
 
   return (
@@ -86,12 +122,12 @@ export default function SimulationPage() {
                 <select
                   value={selectedZone.id}
                   onChange={(e) => {
-                    const zone = mockZones.find((z) => z.id === e.target.value)
+                    const zone = zones.find((z) => z.id === e.target.value)
                     if (zone) setSelectedZone(zone)
                   }}
                   className="w-full px-4 py-2 bg-input border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                 >
-                  {mockZones.map((zone) => (
+                  {zones.map((zone) => (
                     <option key={zone.id} value={zone.id}>
                       {zone.name}
                     </option>
