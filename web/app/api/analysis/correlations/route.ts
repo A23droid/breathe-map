@@ -1,38 +1,21 @@
 import { NextResponse } from 'next/server'
-import { mockZones, generateMockAQIEstimates, generateMockClusters } from '@/lib/mock-data'
+import { getCorrelationsFromEstimates, getLatestAQIForZones, listZones } from '@/lib/db/repository'
 
-/**
- * GET /api/analysis/clusters
- * Returns mock zone clusters based on similarity in AQI and characteristics
- * 
- * Response:
- * Array of clusters with zones, average AQI, and characteristics
- * 
- * DISCLAIMER: Clusters are exploratory groupings from mock data only
- */
 export async function GET() {
   try {
-    // Generate current estimates for all zones
-    const estimates = generateMockAQIEstimates()
+    const zones = await listZones()
+    const estimates = await getLatestAQIForZones(zones)
+    const correlations = getCorrelationsFromEstimates(zones, estimates)
 
-    // Generate clusters based on current mock data
-    const clusters = generateMockClusters(estimates)
-
-    const response = {
-      data: clusters,
-      total_zones: mockZones.length,
-      total_clusters: clusters.length,
+    return NextResponse.json({
+      data: correlations,
+      sample_size: zones.length,
       disclaimer:
-        'EXPLORATORY CLUSTERING: Zone groupings are based on mock AQI calculations and land use types. Results are for educational purposes only and do not represent validated environmental clusters.',
+        'Correlations are exploratory and computed from deterministic AQI model outputs. They are not causal evidence.',
       timestamp: new Date().toISOString(),
-    }
-
-    return NextResponse.json(response)
+    })
   } catch (error) {
-    console.error('Clustering analysis error:', error)
-    return NextResponse.json(
-      { error: 'Failed to generate clusters' },
-      { status: 500 }
-    )
+    console.error('Correlation analysis error:', error)
+    return NextResponse.json({ error: 'Failed to generate correlations' }, { status: 500 })
   }
 }

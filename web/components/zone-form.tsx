@@ -4,7 +4,6 @@ import React from "react"
 
 import { useState } from 'react'
 import { Zone } from '@/lib/types'
-import { generateId } from '@/lib/utils'
 
 interface ZoneFormProps {
   initialZone?: Zone
