@@ -6,35 +6,57 @@ import { NavBar } from '@/components/nav-bar'
 import { DisclaimerBanner } from '@/components/disclaimer-banner'
 import { FooterDisclaimer } from '@/components/footer-disclaimer'
 import { AQIBadge } from '@/components/aqi-badge'
-import { mockZones, generateMockAQIEstimates } from '@/lib/mock-data'
-import { AQIEstimate } from '@/lib/types'
+import { AQIEstimate, Zone } from '@/lib/types'
 
 export default function DashboardPage() {
+  const emptySummary = {
+    average_aqi: 0,
+    highest_aqi: 0,
+    lowest_aqi: 0,
+    total_zones: 0,
+    distribution: {
+      good: 0,
+      moderate: 0,
+      poor: 0,
+      severe: 0,
+    },
+  }
+
+  const [zones, setZones] = useState<Zone[]>([])
   const [estimates, setEstimates] = useState<Map<string, AQIEstimate>>(new Map())
+  const [summary, setSummary] = useState(emptySummary)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    setEstimates(generateMockAQIEstimates())
-    setIsLoading(false)
+    const loadSummary = async () => {
+      try {
+        const response = await fetch('/api/dashboard/summary', { cache: 'no-store' })
+        const data = await response.json()
+        setZones(data.zones ?? [])
+        setEstimates(new Map(Object.entries(data.estimates ?? {}) as [string, AQIEstimate][]))
+        setSummary(data.summary ?? emptySummary)
+      } catch (error) {
+        console.error('Failed to load dashboard:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void loadSummary()
   }, [])
 
   if (isLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center">Loading dashboard...</div>
   }
 
-  // Calculate statistics
-  const allEstimates = Array.from(estimates.values())
-  const averageAQI =
-    allEstimates.length > 0
-      ? Math.round(allEstimates.reduce((sum, e) => sum + e.estimated_aqi, 0) / allEstimates.length)
-      : 0
-  const maxAQI = allEstimates.length > 0 ? Math.max(...allEstimates.map((e) => e.estimated_aqi)) : 0
-  const minAQI = allEstimates.length > 0 ? Math.min(...allEstimates.map((e) => e.estimated_aqi)) : 0
+  const averageAQI = summary.average_aqi
+  const maxAQI = summary.highest_aqi
+  const minAQI = summary.lowest_aqi
 
-  const goodCount = allEstimates.filter((e) => e.category === 'good').length
-  const moderateCount = allEstimates.filter((e) => e.category === 'moderate').length
-  const poorCount = allEstimates.filter((e) => e.category === 'poor').length
-  const severeCount = allEstimates.filter((e) => e.category === 'severe').length
+  const goodCount = summary.distribution.good
+  const moderateCount = summary.distribution.moderate
+  const poorCount = summary.distribution.poor
+  const severeCount = summary.distribution.severe
 
   return (
     <div className="min-h-screen bg-background">
@@ -59,7 +81,7 @@ export default function DashboardPage() {
               </div>
               <span className="text-2xl text-muted-foreground/50">📊</span>
             </div>
-            <p className="text-xs text-muted-foreground">Across {mockZones.length} zones</p>
+            <p className="text-xs text-muted-foreground">Across {summary.total_zones} zones</p>
             <div className="mt-3 pt-3 border-t border-border/30 flex items-center gap-1">
               <span className="text-amber-400">↑</span>
               <span className="text-xs text-muted-foreground">Stable</span>
@@ -100,7 +122,7 @@ export default function DashboardPage() {
             <div className="flex items-start justify-between mb-3">
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Total Zones</p>
-                <p className="text-4xl font-bold text-foreground mt-2">{mockZones.length}</p>
+                <p className="text-4xl font-bold text-foreground mt-2">{summary.total_zones}</p>
               </div>
               <span className="text-2xl text-muted-foreground/50">📍</span>
             </div>
@@ -165,7 +187,7 @@ export default function DashboardPage() {
                   Recent Zones
                 </h3>
                 <div className="space-y-3">
-                  {mockZones.slice(0, 5).map((zone) => {
+                  {zones.slice(0, 5).map((zone) => {
                     const estimate = estimates.get(zone.id)
                     return (
                       <Link

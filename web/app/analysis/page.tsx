@@ -4,17 +4,36 @@ import { useState, useEffect } from 'react'
 import { NavBar } from '@/components/nav-bar'
 import { DisclaimerBanner } from '@/components/disclaimer-banner'
 import { FooterDisclaimer } from '@/components/footer-disclaimer'
-import { mockZones, generateMockAQIEstimates, generateMockClusters, mockCorrelations } from '@/lib/mock-data'
 import { ZoneCluster, AQICorrelation } from '@/lib/types'
 
 export default function AnalysisPage() {
+  const [correlations, setCorrelations] = useState<AQICorrelation[]>([])
   const [clusters, setClusters] = useState<ZoneCluster[]>([])
+  const [zoneLookup, setZoneLookup] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const estimates = generateMockAQIEstimates()
-    setClusters(generateMockClusters(estimates))
-    setIsLoading(false)
+    const loadAnalysis = async () => {
+      try {
+        const [correlationRes, clusterRes] = await Promise.all([
+          fetch('/api/analysis/correlations', { cache: 'no-store' }),
+          fetch('/api/analysis/clusters', { cache: 'no-store' }),
+        ])
+
+        const correlationData = await correlationRes.json()
+        const clusterData = await clusterRes.json()
+
+        setCorrelations(correlationData.data ?? [])
+        setClusters(clusterData.data ?? [])
+        setZoneLookup(clusterData.zone_lookup ?? {})
+      } catch (error) {
+        console.error('Failed to load analysis:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void loadAnalysis()
   }, [])
 
   if (isLoading) {
@@ -30,7 +49,7 @@ export default function AnalysisPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Pattern Analysis</h1>
           <p className="text-muted-foreground">
-            Explore correlations between environmental factors and AQI patterns using mock analytical data.
+            Explore correlations between environmental factors and AQI patterns from persisted zone data.
           </p>
         </div>
 
@@ -45,11 +64,11 @@ export default function AnalysisPage() {
           </div>
           <div className="card-elevated rounded-lg p-8">
             <p className="text-sm text-muted-foreground mb-6">
-              The following correlations show how environmental factors relate to estimated AQI levels in this mock dataset.
+              The following correlations show how environmental factors relate to estimated AQI levels in the current dataset.
             </p>
 
             <div className="space-y-3 mb-8">
-              {mockCorrelations.map((correlation, index) => {
+              {correlations.map((correlation, index) => {
                 const isPositive = correlation.correlation_coefficient > 0
                 const absValue = Math.abs(correlation.correlation_coefficient)
 
@@ -92,7 +111,7 @@ export default function AnalysisPage() {
                 Correlation values range from <strong>-1 to +1</strong>. Positive values indicate that as one factor increases, AQI tends to increase. Negative values indicate inverse relationships.
               </p>
               <p className="text-xs text-muted-foreground">
-                <strong>⚠️ Important:</strong> These are exploratory correlations from mock data and do not imply causation.
+                <strong>⚠️ Important:</strong> These are exploratory correlations and do not imply causation.
               </p>
             </div>
           </div>
@@ -137,17 +156,14 @@ export default function AnalysisPage() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    {cluster.zones.map((zoneId) => {
-                      const zone = mockZones.find((z) => z.id === zoneId)
-                      return (
-                        <div
-                          key={zoneId}
-                          className="px-3 py-1 bg-primary/10 text-primary rounded text-xs font-medium border border-primary/30"
-                        >
-                          {zone?.name || `Zone ${zoneId}`}
-                        </div>
-                      )
-                    })}
+                    {cluster.zones.map((zoneId) => (
+                      <div
+                        key={zoneId}
+                        className="px-3 py-1 bg-primary/10 text-primary rounded text-xs font-medium border border-primary/30"
+                      >
+                        {zoneLookup[zoneId] || `Zone ${zoneId.slice(0, 8)}`}
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}

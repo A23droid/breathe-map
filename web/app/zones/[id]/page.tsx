@@ -6,7 +6,6 @@ import { NavBar } from '@/components/nav-bar'
 import { DisclaimerBanner } from '@/components/disclaimer-banner'
 import { FooterDisclaimer } from '@/components/footer-disclaimer'
 import { AQIBadge } from '@/components/aqi-badge'
-import { mockZones, generateMockAQIEstimates, calculateMockAQI, getFeatureContributions } from '@/lib/mock-data'
 import { Zone, AQIEstimate } from '@/lib/types'
 import { formatDate } from '@/lib/utils'
 
@@ -19,26 +18,24 @@ export default function ZoneDetailPage() {
 
   useEffect(() => {
     const zoneId = params.id as string
-    const foundZone = mockZones.find((z) => z.id === zoneId)
-
-    if (foundZone) {
-      setZone(foundZone)
-
-      // Generate fresh AQI estimate
-      const aqi = calculateMockAQI(foundZone)
-      const contributions = getFeatureContributions(foundZone)
-
-      setEstimate({
-        zone_id: foundZone.id,
-        estimated_aqi: aqi,
-        category: aqi <= 50 ? 'good' : aqi <= 100 ? 'moderate' : aqi <= 150 ? 'poor' : 'severe',
-        feature_contributions: contributions,
-        assumptions: `AQI estimation based on zone characteristics as of ${new Date().toLocaleDateString()}.`,
-        timestamp: new Date().toISOString(),
-      })
+    const loadZone = async () => {
+      try {
+        const response = await fetch(`/api/zones/${zoneId}`, { cache: 'no-store' })
+        if (!response.ok) {
+          setIsLoading(false)
+          return
+        }
+        const data = await response.json()
+        setZone(data.zone)
+        setEstimate(data.estimate)
+      } catch (error) {
+        console.error('Failed to load zone details:', error)
+      } finally {
+        setIsLoading(false)
+      }
     }
 
-    setIsLoading(false)
+    void loadZone()
   }, [params.id])
 
   if (isLoading) {

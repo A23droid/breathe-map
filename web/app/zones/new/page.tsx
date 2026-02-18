@@ -5,9 +5,7 @@ import { useRouter } from 'next/navigation'
 import { NavBar } from '@/components/nav-bar'
 import { DisclaimerBanner } from '@/components/disclaimer-banner'
 import { ZoneForm } from '@/components/zone-form'
-import { mockZones } from '@/lib/mock-data'
 import { Zone } from '@/lib/types'
-import { generateId } from '@/lib/utils'
 
 export default function NewZonePage() {
   const router = useRouter()
@@ -16,17 +14,16 @@ export default function NewZonePage() {
   const handleSubmit = async (formData: Omit<Zone, 'id' | 'created_at'>) => {
     setIsLoading(true)
     try {
-      // Simulate saving (in a real app, this would be a POST request)
-      const newZone: Zone = {
-        ...formData,
-        id: generateId(),
-        created_at: new Date().toISOString(),
+      const response = await fetch('/api/zones', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create zone')
       }
 
-      // Add to mock data
-      mockZones.push(newZone)
-
-      // Redirect to zones list
       router.push('/zones')
     } catch (error) {
       console.error('Error creating zone:', error)

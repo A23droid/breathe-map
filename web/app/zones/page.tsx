@@ -6,9 +6,7 @@ import { NavBar } from '@/components/nav-bar'
 import { DisclaimerBanner } from '@/components/disclaimer-banner'
 import { FooterDisclaimer } from '@/components/footer-disclaimer'
 import { AQIBadge } from '@/components/aqi-badge'
-import { mockZones, generateMockAQIEstimates } from '@/lib/mock-data'
 import { Zone, AQIEstimate } from '@/lib/types'
-import { formatDate } from '@/lib/utils'
 
 export default function ZonesPage() {
   const [zones, setZones] = useState<Zone[]>([])
@@ -16,10 +14,20 @@ export default function ZonesPage() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Load mock zones and estimates
-    setZones(mockZones)
-    setEstimates(generateMockAQIEstimates())
-    setIsLoading(false)
+    const loadZones = async () => {
+      try {
+        const response = await fetch('/api/zones', { cache: 'no-store' })
+        const data = await response.json()
+        setZones(data.zones ?? [])
+        setEstimates(new Map(Object.entries(data.estimates ?? {}) as [string, AQIEstimate][]))
+      } catch (error) {
+        console.error('Failed to load zones:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void loadZones()
   }, [])
 
   if (isLoading) {
