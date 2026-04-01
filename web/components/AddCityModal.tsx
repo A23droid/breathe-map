@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useCity } from '@/context/CityContext'
+import { Loader } from '@/components/loader'
 import toast from 'react-hot-toast'
 
 // ─── FONT CONFIG ─────────────────────────────────────────────────────────────
@@ -418,7 +419,7 @@ export function AddCityModal({ open, onClose }: AddCityModalProps) {
                         >
                             {isSaving ? (
                                 <>
-                                    <div className="w-3.5 h-3.5 rounded-full border-2 border-zinc-900/30 border-t-zinc-900 animate-spin" />
+                                    <Loader variant="inline" />
                                     Adding City…
                                 </>
                             ) : (

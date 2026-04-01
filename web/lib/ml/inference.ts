@@ -4,7 +4,7 @@ import { Zone } from '@/lib/types'
 
 type InferenceOutput = {
   estimated_aqi: number
-  category: 'good' | 'moderate' | 'poor' | 'severe'
+  category: 'good' | 'satisfactory' | 'moderate' | 'poor' | 'severe'
   cluster_id: number
   feature_contributions: {
     traffic: number

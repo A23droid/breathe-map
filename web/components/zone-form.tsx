@@ -2,12 +2,13 @@
 
 import React, { useState } from 'react'
 import { Zone, LandUseType } from '@/lib/types'
+import { Loader } from '@/components/loader'
 import { Home, Building2, Factory, Trees, Layers } from 'lucide-react'
 
 // ─── FONT CONFIG ────────────────────────────────────────────────────────────
-const FONT_IMPORT  = 'Google+Sans:wght@300;400;500;600;700'
+const FONT_IMPORT = 'Google+Sans:wght@300;400;500;600;700'
 const FONT_DISPLAY = "'Google Sans', sans-serif"
-const FONT_BODY    = "'Google Sans', sans-serif"
+const FONT_BODY = "'Google Sans', sans-serif"
 // ────────────────────────────────────────────────────────────────────────────
 
 interface ZoneFormProps {
@@ -81,22 +82,22 @@ function FieldLabel({ htmlFor, children }: { htmlFor?: string; children: React.R
 }
 
 const LAND_USE_OPTIONS: { value: LandUseType; label: string; icon: React.ReactNode }[] = [
-  { value: 'residential', label: 'Residential', icon: <Home size={13} />      },
-  { value: 'commercial',  label: 'Commercial',  icon: <Building2 size={13} /> },
-  { value: 'industrial',  label: 'Industrial',  icon: <Factory size={13} />   },
-  { value: 'green_space', label: 'Green Space', icon: <Trees size={13} />     },
-  { value: 'mixed',       label: 'Mixed Use',   icon: <Layers size={13} />    },
+  { value: 'residential', label: 'Residential', icon: <Home size={13} /> },
+  { value: 'commercial', label: 'Commercial', icon: <Building2 size={13} /> },
+  { value: 'industrial', label: 'Industrial', icon: <Factory size={13} /> },
+  { value: 'green_space', label: 'Green Space', icon: <Trees size={13} /> },
+  { value: 'mixed', label: 'Mixed Use', icon: <Layers size={13} /> },
 ]
 
 // ── Form ─────────────────────────────────────────────────────────────────────
 export function ZoneForm({ initialZone, onSubmit, onCancel, isLoading }: ZoneFormProps) {
   const [formData, setFormData] = useState({
-    name:               initialZone?.name               || '',
-    land_use_type:      (initialZone?.land_use_type      || 'mixed') as LandUseType,
-    traffic_density:    initialZone?.traffic_density     || 50,
-    population_density: initialZone?.population_density  || 50,
-    road_length:        initialZone?.road_length         || 10,
-    notes:              initialZone?.notes               || '',
+    name: initialZone?.name || '',
+    land_use_type: (initialZone?.land_use_type || 'mixed') as LandUseType,
+    traffic_density: initialZone?.traffic_density || 50,
+    population_density: initialZone?.population_density || 50,
+    road_length: initialZone?.road_length || 10,
+    notes: initialZone?.notes || '',
   })
 
   const handleChange = (
@@ -285,18 +286,11 @@ export function ZoneForm({ initialZone, onSubmit, onCancel, isLoading }: ZoneFor
           >
             {isLoading ? (
               <>
-                <div className="w-4 h-4 rounded-full border-2 border-zinc-900/30 border-t-zinc-900 animate-spin" />
+                <Loader variant="inline" />
                 Saving…
               </>
             ) : (
-              <>
-                <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" strokeLinejoin="round" />
-                  <polyline points="17 21 17 13 7 13 7 21" strokeLinejoin="round" />
-                  <polyline points="7 3 7 8 15 8" strokeLinejoin="round" />
-                </svg>
-                Save Zone
-              </>
+              'Save Zone'
             )}
           </button>
 

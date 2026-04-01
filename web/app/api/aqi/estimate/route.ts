@@ -13,7 +13,7 @@ import { getZoneById, storeAQIEstimate } from '@/lib/db/repository'
  * Response:
  * {
  *   estimated_aqi: number
- *   category: 'good' | 'moderate' | 'poor' | 'severe'
+ *   category: 'good' | 'satisfactory' | 'moderate' | 'poor' | 'severe'
  *   feature_contributions: { traffic, population, road_network, land_use }
  *   assumptions: string
  *   timestamp: ISO string

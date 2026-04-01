@@ -34,19 +34,6 @@ function PinIcon({ size = 12, color = 'currentColor' }: { size?: number; color?:
 function BrandMark() {
   return (
     <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
-      <div
-        className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-        style={{
-          background: 'linear-gradient(135deg, #059669, #34d399)',
-          // Softer glow — matches hero accent intensity
-          boxShadow: '0 0 8px rgba(52,211,153,0.22)',
-        }}
-      >
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-        </svg>
-      </div>
       <span
         className="text-[17px] lg:text-[18px] font-semibold tracking-tight"
         style={{
@@ -66,7 +53,7 @@ function BrandMark() {
 export function NavBar() {
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
-  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false)
   const [addCityOpen, setAddCityOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
@@ -78,12 +65,12 @@ export function NavBar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  useEffect(() => { setDrawerOpen(false) }, [pathname])
+  useEffect(() => { setMenuOpen(false) }, [pathname])
 
   useEffect(() => {
-    document.body.style.overflow = drawerOpen ? 'hidden' : ''
+    document.body.style.overflow = menuOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
-  }, [drawerOpen])
+  }, [menuOpen])
 
   return (
     <>
@@ -94,36 +81,41 @@ export function NavBar() {
         :root { --font-display: ${FONT_DISPLAY}; --font-body: ${FONT_BODY}; }
         .nav-font { font-family: var(--font-body); }
 
-        /* Nav links — slightly wider spacing for breathing room */
+        /* Desktop nav links */
         .nav-link-active { color: #34d399; background: rgba(52,211,153,0.08); }
         .nav-link-idle   { color: #71717a; }
         .nav-link-idle:hover { color: #d4d4d8; background: rgba(255,255,255,0.04); }
 
-        /* Drawer links */
-        .drawer-link-active { color: #34d399; background: rgba(52,211,153,0.08); }
-        .drawer-link-idle   { color: #d4d4d8; }
-        .drawer-link-idle:hover { color: #f4f4f5; background: rgba(255,255,255,0.04); }
-
-        /* City buttons in drawer */
+        /* City buttons in desktop dropdown */
         .city-btn-active { color: #34d399; background: rgba(52,211,153,0.08); border-color: rgba(52,211,153,0.2); }
         .city-btn-idle   { color: #71717a; background: transparent; border-color: rgba(63,63,70,0.4); }
         .city-btn-idle:hover { color: #d4d4d8; border-color: rgba(63,63,70,0.7); }
 
-        @keyframes drawerIn {
-          from { opacity: 0; transform: translateX(100%); }
-          to   { opacity: 1; transform: translateX(0); }
+        /* Mobile overlay animations */
+        @keyframes overlayIn {
+          from { opacity: 0; transform: scale(0.97); }
+          to   { opacity: 1; transform: scale(1); }
         }
-        .drawer-enter { animation: drawerIn 0.22s cubic-bezier(0.32,0.72,0,1) both; }
+        .overlay-enter { animation: overlayIn 0.22s cubic-bezier(0.16,1,0.3,1) both; }
 
         @keyframes backdropIn { from { opacity: 0; } to { opacity: 1; } }
         .backdrop-enter { animation: backdropIn 0.2s ease both; }
+
+        /* Mobile nav link styles */
+        .mobile-link-active { color: #34d399; }
+        .mobile-link-idle   { color: #d4d4d8; }
+        .mobile-link-idle:hover { color: #f4f4f5; }
+
+        /* Mobile city pill buttons */
+        .mobile-city-active { color: #34d399; background: rgba(52,211,153,0.08); border-color: rgba(52,211,153,0.2); }
+        .mobile-city-idle   { color: #71717a; background: transparent; border-color: rgba(63,63,70,0.4); }
+        .mobile-city-idle:hover { color: #d4d4d8; border-color: rgba(63,63,70,0.7); }
       `}</style>
 
       {/* ── Top navbar ─────────────────────────────────────────────────────── */}
       <nav
         className="nav-font sticky top-0 z-40 border-b"
         style={{
-          // Starts very transparent over the hero gradient, firms up on scroll
           backgroundColor: scrolled ? 'rgba(9,9,11,0.88)' : 'rgba(9,9,11,0.5)',
           borderBottomColor: scrolled ? 'rgba(39,39,42,0.6)' : 'rgba(39,39,42,0.2)',
           backdropFilter: 'blur(20px)',
@@ -146,7 +138,6 @@ export function NavBar() {
                     key={link.href}
                     href={link.href}
                     className={cn(
-                      // Slightly wider px for breathing room
                       'px-4 py-1.5 rounded-lg text-[13px] font-medium transition-all duration-150',
                       active ? 'nav-link-active' : 'nav-link-idle',
                     )}
@@ -185,10 +176,11 @@ export function NavBar() {
                   </svg>
                 </button>
 
-                {/* Add City */}
+                {/* Add City — icon-only with tooltip (desktop toolbar) */}
                 <button
                   onClick={() => { setCityDropdownOpen(false); setAddCityOpen(true) }}
                   title="Add new city"
+                  aria-label="Add new city"
                   className="w-7 h-7 flex items-center justify-center rounded-lg text-zinc-600 hover:text-emerald-400 hover:bg-zinc-800/50 transition-colors"
                 >
                   <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -196,10 +188,11 @@ export function NavBar() {
                   </svg>
                 </button>
 
-                {/* Export */}
+                {/* Export — icon-only with tooltip (desktop toolbar) */}
                 <button
                   onClick={() => setExportOpen(true)}
                   title="Export report"
+                  aria-label="Export report"
                   className="w-7 h-7 flex items-center justify-center rounded-lg text-zinc-600 hover:text-emerald-400 hover:bg-zinc-800/50 transition-colors"
                 >
                   <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -236,7 +229,7 @@ export function NavBar() {
 
             {/* ── Mobile: city chip + hamburger ── */}
             <div className="flex lg:hidden items-center gap-2.5">
-              {/* Read-only city indicator — minimal, not a CTA */}
+              {/* Read-only city indicator */}
               <div
                 className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[12px] font-medium"
                 style={{
@@ -250,24 +243,25 @@ export function NavBar() {
                 {currentCity.name}
               </div>
 
-              {/* Hamburger — borderless, lighter weight */}
+              {/* Hamburger toggle — icon-only (allowed by spec) */}
               <button
-                onClick={() => setDrawerOpen((v) => !v)}
+                onClick={() => setMenuOpen((v) => !v)}
                 className="flex flex-col justify-center items-center w-10 h-10 gap-[5px] rounded-lg transition-colors"
-                style={{ background: drawerOpen ? 'rgba(255,255,255,0.06)' : 'transparent' }}
-                aria-label="Open menu"
+                style={{ background: menuOpen ? 'rgba(255,255,255,0.06)' : 'transparent' }}
+                aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={menuOpen}
               >
                 <span
                   className="w-[16px] h-0.5 rounded-full bg-zinc-400 transition-all duration-200 origin-center"
-                  style={{ transform: drawerOpen ? 'rotate(45deg) translateY(5px)' : 'none' }}
+                  style={{ transform: menuOpen ? 'rotate(45deg) translateY(5px)' : 'none' }}
                 />
                 <span
                   className="w-[16px] h-0.5 rounded-full bg-zinc-400 transition-all duration-200"
-                  style={{ opacity: drawerOpen ? 0 : 1 }}
+                  style={{ opacity: menuOpen ? 0 : 1 }}
                 />
                 <span
                   className="w-[16px] h-0.5 rounded-full bg-zinc-400 transition-all duration-200 origin-center"
-                  style={{ transform: drawerOpen ? 'rotate(-45deg) translateY(-5px)' : 'none' }}
+                  style={{ transform: menuOpen ? 'rotate(-45deg) translateY(-5px)' : 'none' }}
                 />
               </button>
             </div>
@@ -276,136 +270,112 @@ export function NavBar() {
         </div>
       </nav>
 
-      {/* ── Mobile drawer ──────────────────────────────────────────────────── */}
-      {drawerOpen && (
+      {/* ── Mobile fullscreen centered overlay ─────────────────────────────── */}
+      {menuOpen && (
         <>
+          {/* Backdrop — click to dismiss */}
           <div
-            className="backdrop-enter lg:hidden fixed inset-0 z-40 bg-black/50"
-            style={{ backdropFilter: 'blur(2px)', WebkitBackdropFilter: 'blur(2px)' }}
-            onClick={() => setDrawerOpen(false)}
+            className="backdrop-enter lg:hidden fixed inset-0 z-40 bg-black/65"
+            style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+            onClick={() => setMenuOpen(false)}
+            aria-hidden="true"
           />
-          <div
-            className="drawer-enter lg:hidden fixed top-0 right-0 bottom-0 z-50 w-72 flex flex-col border-l"
-            style={{
-              backgroundColor: 'rgba(9,9,11,0.98)',
-              borderLeftColor: 'rgba(39,39,42,0.6)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-            }}
-          >
-            {/* Header */}
-            <div
-              className="flex items-center justify-between px-5 h-14 border-b flex-shrink-0"
-              style={{ borderBottomColor: 'rgba(39,39,42,0.5)' }}
-            >
-              <BrandMark />
-              <button
-                onClick={() => setDrawerOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800/50 transition-colors flex-shrink-0"
-                aria-label="Close menu"
-              >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
 
-            {/* Body */}
-            <div className="flex-1 overflow-y-auto px-4 py-4">
-              {/* Nav links */}
-              <div className="space-y-0.5 mb-6">
-                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.15em] px-3 mb-2" style={{ fontFamily: FONT_DISPLAY }}>
-                  Navigation
-                </p>
-                {NAV_LINKS.map((link) => {
-                  const active = pathname === link.href
+          {/* Overlay — centered content column */}
+          <div
+            className="overlay-enter lg:hidden fixed inset-0 z-50 flex flex-col items-center justify-center"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation menu"
+          >
+            {/* Close button — top-right, icon-only (allowed by spec) */}
+            <button
+              onClick={() => setMenuOpen(false)}
+              className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-xl text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/60 transition-colors"
+              aria-label="Close menu"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* ── Nav links ── large, centered */}
+            <nav aria-label="Mobile navigation" className="flex flex-col items-center gap-0.5 mb-10 w-full px-6">
+              {NAV_LINKS.map((link) => {
+                const active = pathname === link.href
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMenuOpen(false)}
+                    className={cn(
+                      'w-full max-w-xs text-center px-6 rounded-2xl text-[22px] font-semibold transition-all duration-150',
+                      active ? 'mobile-link-active' : 'mobile-link-idle',
+                    )}
+                    style={{ fontFamily: FONT_DISPLAY, minHeight: '56px', lineHeight: '56px' }}
+                  >
+                    {link.label}
+                  </Link>
+                )
+              })}
+            </nav>
+
+            {/* Divider */}
+            <div className="w-full max-w-xs h-px bg-zinc-800/60 mb-7" />
+
+            {/* ── City selector ── */}
+            <div className="flex flex-col items-center gap-3 w-full px-6 mb-7">
+              <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.18em]" style={{ fontFamily: FONT_DISPLAY }}>
+                Select City
+              </p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {cities.map((city) => {
+                  const active = city.id === currentCity.id
                   return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setDrawerOpen(false)}
+                    <button
+                      key={city.id}
+                      onClick={() => { setCurrentCity(city.id); setMenuOpen(false) }}
                       className={cn(
-                        'flex items-center w-full px-3 rounded-xl text-[15px] font-medium transition-all duration-150',
-                        active ? 'drawer-link-active' : 'drawer-link-idle',
+                        'px-5 rounded-xl text-[14px] font-medium transition-all duration-150 border',
+                        active ? 'mobile-city-active' : 'mobile-city-idle',
                       )}
-                      style={{ fontFamily: FONT_DISPLAY, minHeight: '44px' }}
+                      style={{ fontFamily: FONT_DISPLAY, minHeight: '42px' }}
                     >
-                      {link.label}
-                    </Link>
+                      {city.name}
+                    </button>
                   )
                 })}
               </div>
 
-              <div className="h-px bg-zinc-800/50 mb-6" />
-
-              {/* City selection */}
-              <div>
-                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.15em] px-3 mb-3" style={{ fontFamily: FONT_DISPLAY }}>
-                  Select City
-                </p>
-                <div className="flex flex-wrap gap-2 px-1">
-                  {cities.map((city) => {
-                    const active = city.id === currentCity.id
-                    return (
-                      <button
-                        key={city.id}
-                        onClick={() => { setCurrentCity(city.id); setDrawerOpen(false) }}
-                        className={cn(
-                          'city-btn-idle px-4 rounded-xl text-[13.5px] font-medium transition-all duration-150 border',
-                          active && 'city-btn-active',
-                        )}
-                        style={{ fontFamily: FONT_DISPLAY, minHeight: '40px' }}
-                      >
-                        {city.name}
-                      </button>
-                    )
-                  })}
-                </div>
-
-                {/* Add City in drawer */}
-                <button
-                  onClick={() => { setDrawerOpen(false); setAddCityOpen(true) }}
-                  className="flex items-center gap-2 mt-3 px-3 text-[13px] text-emerald-500 hover:text-emerald-400 font-semibold transition-colors"
-                  style={{ fontFamily: FONT_DISPLAY }}
-                >
-                  <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12h14" strokeLinecap="round" />
-                  </svg>
-                  Add City
-                </button>
-              </div>
-
-              <div className="h-px bg-zinc-800/50 my-6" />
-
-              {/* Export in drawer */}
-              <div>
-                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.15em] px-3 mb-3" style={{ fontFamily: FONT_DISPLAY }}>
-                  Reports
-                </p>
-                <button
-                  onClick={() => { setDrawerOpen(false); setExportOpen(true) }}
-                  className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl text-[14px] font-medium text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800/40 transition-colors"
-                  style={{ fontFamily: FONT_DISPLAY }}
-                >
-                  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeLinecap="round" />
-                    <polyline points="7 10 12 15 17 10" strokeLinecap="round" strokeLinejoin="round" />
-                    <line x1="12" y1="15" x2="12" y2="3" strokeLinecap="round" />
-                  </svg>
-                  Export Report
-                </button>
-              </div>
+              {/* Add City — text only */}
+              <button
+                onClick={() => { setMenuOpen(false); setAddCityOpen(true) }}
+                className="text-[13px] text-emerald-500 hover:text-emerald-400 font-semibold transition-colors"
+                style={{ fontFamily: FONT_DISPLAY }}
+              >
+                Add City
+              </button>
             </div>
 
-            {/* Footer */}
-            <div
-              className="px-5 py-4 border-t flex-shrink-0"
-              style={{ borderTopColor: 'rgba(39,39,42,0.5)', paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
+            {/* Divider */}
+            <div className="w-full max-w-xs h-px bg-zinc-800/60 mb-7" />
+
+            {/* Export Report — text only */}
+            <button
+              onClick={() => { setMenuOpen(false); setExportOpen(true) }}
+              className="text-[14px] font-medium text-zinc-400 hover:text-zinc-200 transition-colors"
+              style={{ fontFamily: FONT_DISPLAY }}
             >
-              <p className="text-[11px] text-zinc-700 leading-relaxed" style={{ fontFamily: FONT_BODY }}>
-                Educational simulation only. Not for regulatory use.
-              </p>
-            </div>
+              Export Report
+            </button>
+
+            {/* Footer disclaimer */}
+            <p
+              className="absolute bottom-6 text-[11px] text-zinc-700 leading-relaxed text-center px-8"
+              style={{ fontFamily: FONT_BODY }}
+            >
+              Educational simulation only. Not for regulatory use.
+            </p>
           </div>
         </>
       )}

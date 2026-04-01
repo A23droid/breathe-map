@@ -3,11 +3,11 @@
  * All data is mock/simulated - no real sensor data
  */
 
-export type LandUseType = 
-  | 'residential' 
-  | 'commercial' 
-  | 'industrial' 
-  | 'green_space' 
+export type LandUseType =
+  | 'residential'
+  | 'commercial'
+  | 'industrial'
+  | 'green_space'
   | 'mixed'
 
 export type AQICategory = 'good' | 'satisfactory' | 'moderate' | 'poor' | 'severe'
@@ -70,6 +70,7 @@ export interface SummaryReport {
   }
   distribution: {
     good: number
+    satisfactory: number
     moderate: number
     poor: number
     severe: number

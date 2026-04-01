@@ -11,11 +11,11 @@ import {
 // ── Icon map ────────────────────────────────────────────────────────────────
 
 const ICONS: Record<string, React.ReactNode> = {
-    success: React.createElement(CheckCircle, { size: 18, className: 'text-emerald-400 flex-shrink-0 mt-0.5' }),
-    error: React.createElement(AlertCircle, { size: 18, className: 'text-red-400 flex-shrink-0 mt-0.5' }),
-    warning: React.createElement(AlertTriangle, { size: 18, className: 'text-amber-400 flex-shrink-0 mt-0.5' }),
-    info: React.createElement(Info, { size: 18, className: 'text-sky-400 flex-shrink-0 mt-0.5' }),
-    loading: React.createElement(Loader2, { size: 18, className: 'text-slate-400 flex-shrink-0 mt-0.5 animate-spin' }),
+    success: React.createElement(CheckCircle, { size: 18, className: 'text-emerald-500 flex-shrink-0 mt-0.5' }),
+    error: React.createElement(AlertCircle, { size: 18, className: 'text-red-500 flex-shrink-0 mt-0.5' }),
+    warning: React.createElement(AlertTriangle, { size: 18, className: 'text-amber-500 flex-shrink-0 mt-0.5' }),
+    info: React.createElement(Info, { size: 18, className: 'text-sky-500 flex-shrink-0 mt-0.5' }),
+    loading: React.createElement(Loader2, { size: 18, className: 'text-zinc-500 flex-shrink-0 mt-0.5 animate-spin' }),
 }
 
 // ── Accent colors per type ──────────────────────────────────────────────────
@@ -43,10 +43,11 @@ function renderToast(
                     className: `flex gap-3 items-start px-4 py-3 rounded-xl shadow-lg backdrop-blur-sm max-w-sm transition-all duration-300 ${t.visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
                         }`,
                     style: {
-                        backgroundColor: 'rgba(15,23,42,0.95)',
+                        backgroundColor: '#09090b',
                         borderWidth: '1px',
                         borderStyle: 'solid',
-                        borderColor: BORDER_COLORS[type] ?? 'rgba(51,65,85,0.6)',
+                        borderColor: BORDER_COLORS[type] ?? 'rgba(39,39,42,0.6)',
+                        fontFamily: "'Google Sans', sans-serif"
                     },
                     onClick: () => toast.dismiss(t.id),
                 },
@@ -56,7 +57,9 @@ function renderToast(
                     { className: 'flex flex-col min-w-0' },
                     React.createElement(
                         'span',
-                        { className: 'font-medium text-sm text-slate-100 leading-snug' },
+                        {
+                            className: `font-medium text-sm leading-snug ${type === 'success' ? 'text-emerald-500' : 'text-zinc-100'}`
+                        },
                         message
                     ),
                     code

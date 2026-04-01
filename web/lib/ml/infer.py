@@ -11,8 +11,10 @@ def _category(aqi: float) -> str:
     if aqi <= 50:
         return "good"
     if aqi <= 100:
-        return "moderate"
+        return "satisfactory"
     if aqi <= 200:
+        return "moderate"
+    if aqi <= 300:
         return "poor"
     return "severe"
 

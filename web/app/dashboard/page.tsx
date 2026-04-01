@@ -64,8 +64,8 @@ function AnimatedNumber({ target }: { target: number }) {
 }
 
 // ── DonutChart ────────────────────────────────────────────────────────────────
-function DonutChart({ good, moderate, poor, severe, total }: {
-  good: number; moderate: number; poor: number; severe: number; total: number
+function DonutChart({ good, satisfactory, moderate, poor, severe, total }: {
+  good: number; satisfactory: number; moderate: number; poor: number; severe: number; total: number
 }) {
   const [animated, setAnimated] = useState(false)
   useEffect(() => { const t = setTimeout(() => setAnimated(true), 300); return () => clearTimeout(t) }, [])
@@ -74,9 +74,10 @@ function DonutChart({ good, moderate, poor, severe, total }: {
   const circumference = 2 * Math.PI * r
   const segments = [
     { count: good, color: '#34d399', label: 'Good' },
-    { count: moderate, color: '#fbbf24', label: 'Moderate' },
-    { count: poor, color: '#f97316', label: 'Poor' },
-    { count: severe, color: '#f87171', label: 'Severe' },
+    { count: satisfactory, color: '#fbbf24', label: 'Satisfactory' },
+    { count: moderate, color: '#f97316', label: 'Moderate' },
+    { count: poor, color: '#ef4444', label: 'Poor' },
+    { count: severe, color: '#a855f7', label: 'Severe' },
   ]
   let offset = 0
   const arcs = segments.map((s) => {
@@ -174,8 +175,9 @@ function ZoneRow({ zone, estimate }: { zone: Zone; estimate?: AQIEstimate }) {
   const [hovered, setHovered] = useState(false)
   const dotColor =
     estimate?.category === 'good' ? '#34d399' :
-      estimate?.category === 'moderate' ? '#fbbf24' :
-        estimate?.category === 'poor' ? '#f97316' : '#f87171'
+      estimate?.category === 'satisfactory' ? '#fbbf24' :
+        estimate?.category === 'moderate' ? '#f97316' :
+          estimate?.category === 'poor' ? '#ef4444' : '#a855f7'
 
   return (
     <Link
@@ -234,7 +236,7 @@ function SectionHeading({ title, delay }: { title: string; delay: number }) {
 // ── Page constants ────────────────────────────────────────────────────────────
 const EMPTY_SUMMARY = {
   average_aqi: 0, highest_aqi: 0, lowest_aqi: 0, total_zones: 0,
-  distribution: { good: 0, moderate: 0, poor: 0, severe: 0 },
+  distribution: { good: 0, satisfactory: 0, moderate: 0, poor: 0, severe: 0 },
 }
 
 export default function DashboardPage() {
@@ -491,7 +493,7 @@ export default function DashboardPage() {
               <h3 className="text-sm font-semibold text-zinc-300 mb-5" style={{ fontFamily: FONT_DISPLAY }}>
                 Distribution
               </h3>
-              <DonutChart good={distribution.good} moderate={distribution.moderate} poor={distribution.poor} severe={distribution.severe} total={total_zones} />
+              <DonutChart good={distribution.good} satisfactory={distribution.satisfactory} moderate={distribution.moderate} poor={distribution.poor} severe={distribution.severe} total={total_zones} />
               <div className="mt-5 pt-4 border-t border-zinc-800/50">
                 <p className="text-sm text-zinc-400 text-center">{total_zones} zones total</p>
               </div>

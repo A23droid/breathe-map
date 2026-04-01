@@ -273,14 +273,14 @@ export default function Home() {
       <main className="flex-1 body-font">
 
         {/* ── HERO ── */}
-        <section className="relative mesh-bg overflow-hidden">
+        <section className="relative mesh-bg overflow-hidden flex-1 flex items-center justify-center min-h-[calc(100vh-64px)]">
           <ParticleCanvas />
 
           {/* Decorative rings — softer opacity to not compete with content */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] sm:w-[700px] sm:h-[700px] rounded-full border border-emerald-900/15 pointer-events-none" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] sm:w-[1100px] sm:h-[1100px] rounded-full border border-emerald-900/8 pointer-events-none" />
 
-          <div className="relative w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 sm:pt-28 sm:pb-32 md:pt-36 md:pb-44 text-center">
+          <div className="relative w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 text-center">
 
             {/* Badge — uses same muted green as nav city chip for coherence */}
 
@@ -322,27 +322,12 @@ export default function Home() {
                 Explore Zones
               </Link>
             </div>
-
-            {/* AQI Gauges strip */}
-            <div
-              style={{ animation: mounted ? 'heroFade 0.7s ease 0.65s both' : 'none', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
-              className="inline-flex flex-wrap justify-center gap-6 sm:gap-10 rounded-2xl px-6 sm:px-10 py-5 sm:py-6 backdrop-blur-sm"
-            >
-              <AQIRing value={42} label="Zone A" color="#34d399" />
-              <AQIRing value={78} label="Zone B" color="#fbbf24" />
-              <AQIRing value={61} label="Zone C" color="#60a5fa" />
-              <AQIRing value={93} label="Zone D" color="#f87171" />
-              <div className="hidden sm:flex flex-col justify-center items-start gap-1 pl-4 sm:pl-6 border-l border-white/[0.07]">
-                <span className="text-[10px] text-zinc-600 uppercase tracking-widest font-medium">Simulated</span>
-                <span className="text-[10px] text-zinc-600 uppercase tracking-widest font-medium">AQI Values</span>
-              </div>
-            </div>
           </div>
         </section>
 
         {/* ── CAPABILITIES ── */}
-        <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 md:py-32">
-          <div className="text-center mb-12 sm:mb-14">
+        <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+          <div className="text-center mb-10 sm:mb-12">
             {/* Eyebrow — muted green, not full #34d399 saturation */}
             <p className="text-[10px] sm:text-xs font-bold tracking-[0.2em] uppercase mb-2.5" style={{ color: '#6ee7b7' }}>
               What&apos;s Inside
@@ -368,7 +353,7 @@ export default function Home() {
 
         {/* ── STATS STRIP ── */}
         <section className="border-y border-zinc-800/50 bg-zinc-900/20">
-          <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+          <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
               {[
                 { value: '6', unit: '+', label: 'Input Parameters' },
@@ -388,8 +373,8 @@ export default function Home() {
         </section>
 
         {/* ── WORKFLOW ── */}
-        <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 md:py-32">
-          <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
+        <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+          <div className="flex flex-col lg:flex-row gap-10 lg:gap-16 items-start">
             <div className="lg:sticky lg:top-24 lg:w-64 xl:w-72 flex-shrink-0">
               <p className="text-[10px] sm:text-xs font-bold tracking-[0.2em] uppercase mb-2.5" style={{ color: '#6ee7b7' }}>
                 How It Works
@@ -421,14 +406,14 @@ export default function Home() {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] sm:w-[700px] h-[260px] bg-emerald-900/15 blur-[80px] rounded-full" />
           </div>
 
-          <div className="relative w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 md:py-32 text-center">
+          <div className="relative w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 md:py-28 text-center">
             <p className="text-[10px] sm:text-xs font-bold tracking-[0.2em] uppercase mb-3" style={{ color: '#6ee7b7' }}>
               Get Started
             </p>
             <h2 className="hero-title text-3xl sm:text-4xl md:text-5xl text-zinc-100 tracking-tight mb-4 sm:mb-5">
               Start Modelling
             </h2>
-            <p className="text-zinc-500 mb-10 sm:mb-12 max-w-md mx-auto text-sm sm:text-[15px] leading-relaxed">
+            <p className="text-zinc-500 mb-8 sm:mb-10 max-w-md mx-auto text-sm sm:text-[15px] leading-relaxed">
               Open the dashboard to view analytics, or begin by creating and configuring your first zone.
             </p>
 

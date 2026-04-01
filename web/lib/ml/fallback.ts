@@ -23,7 +23,11 @@ export function getFallbackAQIPrediction(zone: Zone) {
     )
   )
 
-  const category = estimated <= 50 ? 'good' : estimated <= 100 ? 'moderate' : estimated <= 200 ? 'poor' : 'severe'
+  const category =
+    estimated <= 50 ? 'good' :
+      estimated <= 100 ? 'satisfactory' :
+        estimated <= 200 ? 'moderate' :
+          estimated <= 300 ? 'poor' : 'severe'
 
   return {
     estimated_aqi: estimated,

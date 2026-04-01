@@ -21,8 +21,9 @@ function withinDateRange(value: string, dateFrom: string | null, dateTo: string 
 function getReportCategory(aqi: number | null) {
   if (aqi === null) return null
   if (aqi <= 50) return 'good' as const
-  if (aqi <= 100) return 'moderate' as const
-  if (aqi <= 150) return 'poor' as const
+  if (aqi <= 100) return 'satisfactory' as const
+  if (aqi <= 200) return 'moderate' as const
+  if (aqi <= 300) return 'poor' as const
   return 'severe' as const
 }
 
@@ -109,19 +110,19 @@ export async function GET(request: Request) {
     const report: SummaryReport = {
       city: cityResponse.data
         ? {
-            id: cityResponse.data.id,
-            name: cityResponse.data.name,
-            center_lat: Number(cityResponse.data.center_lat),
-            center_lng: Number(cityResponse.data.center_lng),
-            zoom: Number(cityResponse.data.zoom),
-          }
+          id: cityResponse.data.id,
+          name: cityResponse.data.name,
+          center_lat: Number(cityResponse.data.center_lat),
+          center_lng: Number(cityResponse.data.center_lng),
+          zoom: Number(cityResponse.data.zoom),
+        }
         : {
-            id: cityId,
-            name: 'Unknown City',
-            center_lat: 0,
-            center_lng: 0,
-            zoom: 12,
-          },
+          id: cityId,
+          name: 'Unknown City',
+          center_lat: 0,
+          center_lng: 0,
+          zoom: 12,
+        },
       overview: {
         zone_count: zones.length,
         average_aqi,
@@ -130,6 +131,7 @@ export async function GET(request: Request) {
       },
       distribution: {
         good: estimates.filter((item) => getReportCategory(item.estimated_aqi) === 'good').length,
+        satisfactory: estimates.filter((item) => getReportCategory(item.estimated_aqi) === 'satisfactory').length,
         moderate: estimates.filter((item) => getReportCategory(item.estimated_aqi) === 'moderate').length,
         poor: estimates.filter((item) => getReportCategory(item.estimated_aqi) === 'poor').length,
         severe: estimates.filter((item) => getReportCategory(item.estimated_aqi) === 'severe').length,

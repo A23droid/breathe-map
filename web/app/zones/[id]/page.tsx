@@ -143,10 +143,11 @@ function SectionHeading({ title }: { title: string }) {
 }
 
 const AQI_CATEGORIES = [
-  { range: '0–50', label: 'Good', desc: 'Satisfactory air quality', color: '#34d399' },
-  { range: '51–100', label: 'Moderate', desc: 'Acceptable quality', color: '#fbbf24' },
-  { range: '101–150', label: 'Poor', desc: 'Sensitive groups affected', color: '#f97316' },
-  { range: '>150', label: 'Severe', desc: 'General population affected', color: '#f87171' },
+  { range: '0–50', label: 'Good', desc: 'Minimal impact', color: '#34d399' },
+  { range: '51–100', label: 'Satisfactory', desc: 'Minor breathing discomfort', color: '#fbbf24' },
+  { range: '101–200', label: 'Moderate', desc: 'Breathing discomfort to sensitive people', color: '#f97316' },
+  { range: '201–300', label: 'Poor', desc: 'Breathing discomfort to most people', color: '#ef4444' },
+  { range: '301–400', label: 'Severe', desc: 'Respiratory impacts', color: '#a855f7' },
 ]
 
 const CONTRIBUTIONS: { key: string; icon: React.ReactNode; label: string; weight: string; color: string }[] = [
@@ -249,7 +250,8 @@ export default function ZoneDetailPage() {
   const aqiColor =
     estimate.estimated_aqi <= 50 ? '#34d399' :
       estimate.estimated_aqi <= 100 ? '#fbbf24' :
-        estimate.estimated_aqi <= 150 ? '#f97316' : '#f87171'
+        estimate.estimated_aqi <= 200 ? '#f97316' :
+          estimate.estimated_aqi <= 300 ? '#ef4444' : '#a855f7'
 
   // ── Main page ─────────────────────────────────────────────────────────────
   return (
@@ -455,12 +457,12 @@ export default function ZoneDetailPage() {
                 <div
                   className="h-full rounded-full transition-all duration-1000 ease-out"
                   style={{
-                    width: `${Math.min((estimate.estimated_aqi / 200) * 100, 100)}%`,
+                    width: `${Math.min((estimate.estimated_aqi / 400) * 100, 100)}%`,
                     backgroundColor: aqiColor,
                   }}
                 />
               </div>
-              <p className="text-[10px] text-zinc-600 mt-1.5">Scale: 0 – 200+</p>
+              <p className="text-[10px] text-zinc-600 mt-1.5">Scale: 0 – 400+</p>
             </div>
 
             {/* Quick actions */}

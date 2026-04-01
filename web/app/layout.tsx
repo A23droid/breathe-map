@@ -7,8 +7,25 @@ import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata: Metadata = {
-  title: 'Breathe Map',
-  description: 'Explore air quality patterns and simulate pollution reduction scenarios.',
+  title: 'Breathe Map — Smart City Air Quality Simulation Platform',
+  description: 'Breathe Map is a smart-city platform that visualizes and simulates air quality at a zone level using urban data, enabling data-driven environmental planning.',
+  keywords: ['smart city', 'air quality', 'AQI', 'urban planning', 'GIS', 'pollution simulation'],
+  metadataBase: new URL('https://breathe-map-w.vercel.app'),
+  openGraph: {
+    title: 'Breathe Map — Smart City Air Quality Simulation Platform',
+    description: 'Visualize and simulate air quality at a zone level using urban data for data-driven environmental planning.',
+    url: 'https://breathe-map-w.vercel.app',
+    siteName: 'Breathe Map',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Breathe Map — Smart City Air Quality Simulation Platform',
+    description: 'Visualize and simulate air quality at a zone level using urban data for data-driven environmental planning.',
+  },
+  icons: {
+    icon: '/favicon.ico',
+  }
 }
 
 export const viewport: Viewport = {
@@ -16,7 +33,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#0F172A',
+  themeColor: '#09090b',
 }
 
 export default function RootLayout({
@@ -26,15 +43,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className="font-sans antialiased bg-background text-foreground flex flex-col min-h-screen">
+      <body className="font-sans antialiased bg-[#09090b] text-foreground flex flex-col min-h-screen">
         <CityProvider>
-          <div className="flex-1">{children}</div>
+          <main className="flex-1 flex flex-col">{children}</main>
           <ToasterProvider />
-
-          {/* ✅ Add here */}
           <Analytics />
           <SpeedInsights />
-
         </CityProvider>
       </body>
     </html>

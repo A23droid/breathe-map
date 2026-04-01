@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useCity } from '@/context/CityContext'
 import { Zone, AQIEstimate, SummaryReport } from '@/lib/types'
+import { Loader } from '@/components/loader'
 import toast from 'react-hot-toast'
 
 // ─── FONT CONFIG ─────────────────────────────────────────────────────────────
@@ -198,7 +199,7 @@ function exportCSV(report: SummaryReport) {
         `# Generated: ${report.generated_at}`,
         `# Zone Count: ${report.overview.zone_count}`,
         `# Average AQI: ${report.overview.average_aqi}`,
-        `# AQI Distribution: Good=${report.distribution.good}, Moderate=${report.distribution.moderate}, Poor=${report.distribution.poor}, Severe=${report.distribution.severe}`,
+        `# AQI Distribution: Good=${report.distribution.good}, Satisfactory=${report.distribution.satisfactory}, Moderate=${report.distribution.moderate}, Poor=${report.distribution.poor}, Severe=${report.distribution.severe}`,
         `# Simulation Runs: ${report.simulation_summary.total_runs}`,
         '',
         headers.join(','),
@@ -246,13 +247,13 @@ async function exportPDF(report: SummaryReport) {
     doc.setLineWidth(0.5)
     doc.line(14, 40, 283, 40)
 
-    // AQI summary row
     doc.setFontSize(8)
     doc.setTextColor(52, 211, 153); doc.text(`Good: ${report.distribution.good}`, 14, 47)
-    doc.setTextColor(251, 191, 36); doc.text(`Moderate: ${report.distribution.moderate}`, 56, 47)
-    doc.setTextColor(249, 115, 22); doc.text(`Poor: ${report.distribution.poor}`, 104, 47)
-    doc.setTextColor(239, 68, 68); doc.text(`Severe: ${report.distribution.severe}`, 143, 47)
-    doc.setTextColor(113, 113, 122); doc.text(`Avg AQI: ${report.overview.average_aqi}`, 185, 47)
+    doc.setTextColor(251, 191, 36); doc.text(`Satisfactory: ${report.distribution.satisfactory}`, 40, 47)
+    doc.setTextColor(249, 115, 22); doc.text(`Moderate: ${report.distribution.moderate}`, 85, 47)
+    doc.setTextColor(239, 68, 68); doc.text(`Poor: ${report.distribution.poor}`, 125, 47)
+    doc.setTextColor(168, 85, 247); doc.text(`Severe: ${report.distribution.severe}`, 160, 47)
+    doc.setTextColor(113, 113, 122); doc.text(`Avg AQI: ${report.overview.average_aqi}`, 195, 47)
 
     // Table
     const tableData = report.zones.map((zone) => [
@@ -403,8 +404,8 @@ function ProgressOverlay({ format }: { format: ExportFormat }) {
     return (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-2xl"
             style={{ background: 'rgba(18,18,20,0.92)', backdropFilter: 'blur(6px)' }}>
-            <div className="w-12 h-12 rounded-full border-2 border-emerald-500/20 border-t-emerald-500 animate-spin mb-4" />
-            <p className="text-sm font-semibold text-zinc-200" style={{ fontFamily: FONT_DISPLAY }}>
+            <Loader variant="inline" label={`Generating ${format.toUpperCase()}…`} />
+            <p className="text-sm font-semibold text-zinc-200 mt-3" style={{ fontFamily: FONT_DISPLAY }}>
                 Generating {format.toUpperCase()}…
             </p>
             <p className="text-xs text-zinc-500 mt-1" style={{ fontFamily: FONT_BODY }}>
@@ -605,7 +606,6 @@ export function ExportModal({ open, onClose }: ExportModalProps) {
                                         </svg>
                                     )}
                                     {f.toUpperCase()}
-                                    {format === f && <span className="text-[10px] opacity-70">selected</span>}
                                 </button>
                             ))}
                         </div>
@@ -640,7 +640,7 @@ export function ExportModal({ open, onClose }: ExportModalProps) {
 
                         {isLoadingZones ? (
                             <div className="flex items-center gap-3 py-4 text-sm text-zinc-500" style={{ fontFamily: FONT_BODY }}>
-                                <div className="w-4 h-4 rounded-full border-2 border-zinc-600 border-t-emerald-500 animate-spin" />
+                                <Loader variant="inline" />
                                 Loading zones…
                             </div>
                         ) : zones.length === 0 ? (
@@ -685,18 +685,11 @@ export function ExportModal({ open, onClose }: ExportModalProps) {
                     >
                         {isExporting ? (
                             <>
-                                <div className="w-3.5 h-3.5 rounded-full border-2 border-zinc-900/30 border-t-zinc-900 animate-spin" />
+                                <Loader variant="inline" />
                                 Exporting…
                             </>
                         ) : (
-                            <>
-                                <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeLinecap="round" />
-                                    <polyline points="7 10 12 15 17 10" strokeLinecap="round" strokeLinejoin="round" />
-                                    <line x1="12" y1="15" x2="12" y2="3" strokeLinecap="round" />
-                                </svg>
-                                Export {format.toUpperCase()}
-                            </>
+                            `Export ${format.toUpperCase()}`
                         )}
                     </button>
                 </div>

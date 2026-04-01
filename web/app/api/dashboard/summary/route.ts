@@ -27,6 +27,7 @@ export async function GET(request: Request) {
         lowest_aqi,
         distribution: {
           good: estimates.filter((item) => item.category === 'good').length,
+          satisfactory: estimates.filter((item) => item.category === 'satisfactory').length,
           moderate: estimates.filter((item) => item.category === 'moderate').length,
           poor: estimates.filter((item) => item.category === 'poor').length,
           severe: estimates.filter((item) => item.category === 'severe').length,
