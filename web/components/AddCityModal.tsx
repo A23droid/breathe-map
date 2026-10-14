@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useCity } from '@/context/CityContext'
 import { Loader } from '@/components/loader'
+import { cartoDarkTileUrl, CARTO_TILE_ATTRIBUTION } from '@/lib/cartoBasemap'
 import toast from 'react-hot-toast'
 
 // ─── FONT CONFIG ─────────────────────────────────────────────────────────────
@@ -75,8 +76,8 @@ function LocationPicker({
                 const map = L.map(containerRef.current!, { center: [lat || 20, lng || 78], zoom: lat ? 11 : 4, zoomControl: true })
                 mapRef.current = map
 
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                    attribution: '&copy; OpenStreetMap contributors &copy; CARTO', subdomains: 'abcd', maxZoom: 19,
+                L.tileLayer(cartoDarkTileUrl(), {
+                    attribution: CARTO_TILE_ATTRIBUTION, subdomains: 'abcd', maxZoom: 19,
                 }).addTo(map)
 
                 // Inject dark controls style

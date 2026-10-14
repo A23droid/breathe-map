@@ -108,70 +108,93 @@ function getCityPieSlices(report: SummaryReport): PieSlice[] {
 
 function renderBarCard(title: string, subtitle: string, slices: PieSlice[]) {
     const canvas = document.createElement('canvas')
-    canvas.width = 540
-    canvas.height = 320
+    canvas.width = 600
+    canvas.height = 360
 
     const ctx = canvas.getContext('2d')
     if (!ctx) return ''
 
+    // Background
     ctx.fillStyle = '#18181b'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
+    // Subtle border
     ctx.strokeStyle = 'rgba(255,255,255,0.08)'
     ctx.lineWidth = 2
     ctx.strokeRect(1, 1, canvas.width - 2, canvas.height - 2)
 
+    // Header region background
+    ctx.fillStyle = 'rgba(255,255,255,0.03)'
+    ctx.fillRect(1, 1, canvas.width - 2, 92)
+
+    // Title
     ctx.fillStyle = '#f4f4f5'
     ctx.font = 'bold 28px Helvetica'
-    ctx.fillText(title, 24, 38)
+    ctx.textBaseline = 'alphabetic'
+    ctx.textAlign = 'left'
+    ctx.fillText(title, 32, 48)
 
+    // Subtitle
     ctx.fillStyle = '#a1a1aa'
-    ctx.font = '18px Helvetica'
-    ctx.fillText(subtitle, 24, 68)
+    ctx.font = '16px Helvetica'
+    ctx.fillText(subtitle, 32, 76)
 
     const maxValue = Math.max(...slices.map((slice) => slice.value), 1)
-    const barX = 32
-    const barY = 110
-    const barTrackWidth = 280
-    const barHeight = 18
-    const rowGap = 42
+    const barX = 130
+    const barY = 134
+    const barTrackWidth = 370
+    const barHeight = 22
+    const rowGap = 44
 
-    ctx.fillStyle = '#71717a'
-    ctx.font = '16px Helvetica'
+    // Ticks and Grid lines
+    const ticks = 4
+    ctx.font = '13px Helvetica'
+    ctx.textAlign = 'center'
+    for (let i = 0; i <= ticks; i++) {
+        const ratio = i / ticks
+        const x = barX + ratio * barTrackWidth
+
+        ctx.fillStyle = '#71717a'
+        ctx.fillText(`${Math.round(maxValue * ratio)}`, x, barY - 16)
+
+        // Subtle vertical grid line
+        ctx.fillStyle = 'rgba(255,255,255,0.05)'
+        ctx.fillRect(x, barY - 8, 1, rowGap * slices.length - 12)
+    }
+
+    ctx.textAlign = 'left'
 
     let legendY = barY
     for (const slice of slices) {
         const barWidth = Math.max(8, (slice.value / maxValue) * barTrackWidth)
 
+        // Label on the left
+        ctx.textBaseline = 'middle'
         ctx.fillStyle = '#e4e4e7'
-        ctx.font = '18px Helvetica'
-        ctx.fillText(slice.label, barX, legendY - 10)
+        ctx.font = '15px Helvetica'
+        ctx.fillText(slice.label, 32, legendY + barHeight / 2)
 
-        ctx.fillStyle = '#27272a'
+        // Background track for the bar
+        ctx.fillStyle = 'rgba(255,255,255,0.04)'
         ctx.fillRect(barX, legendY, barTrackWidth, barHeight)
 
+        // Value bar
         ctx.fillStyle = slice.color
         ctx.fillRect(barX, legendY, barWidth, barHeight)
 
-        ctx.fillStyle = '#a1a1aa'
-        ctx.font = '16px Helvetica'
-        ctx.fillText(`${slice.value.toFixed(1)}`, 330, legendY + 14)
+        // Value text on the right
+        ctx.fillStyle = '#f4f4f5'
+        ctx.font = 'bold 15px Helvetica'
+        ctx.fillText(`${slice.value.toFixed(1)}`, barX + barTrackWidth + 16, legendY + barHeight / 2 + 1)
+
         legendY += rowGap
     }
 
+    // Footer note
+    ctx.textBaseline = 'alphabetic'
     ctx.fillStyle = '#71717a'
-    ctx.font = '15px Helvetica'
-    ctx.fillText('Higher bars indicate stronger modeled contribution to AQI.', 24, 292)
-
-    ctx.fillStyle = '#52525b'
-    ctx.font = '13px Helvetica'
-    const ticks = 4
-    for (let i = 0; i <= ticks; i++) {
-        const ratio = i / ticks
-        const x = barX + ratio * barTrackWidth
-        ctx.fillRect(x, barY - 2, 1, rowGap * slices.length - 18)
-        ctx.fillText(`${Math.round(maxValue * ratio)}`, x - 6, 102)
-    }
+    ctx.font = 'italic 13px Helvetica'
+    ctx.fillText('Higher bars indicate stronger modeled contribution to AQI.', 32, 334)
 
     return canvas.toDataURL('image/png')
 }
@@ -232,7 +255,7 @@ async function exportPDF(report: SummaryReport) {
     doc.setTextColor(244, 244, 245)
     doc.setFontSize(20)
     doc.setFont('helvetica', 'bold')
-    doc.text('Breathe Map Air Quality Report', 14, 18)
+    doc.text('Breathe Map - Air Quality Report', 14, 18)
 
     // Subtitle meta
     doc.setFontSize(9)
@@ -268,7 +291,7 @@ async function exportPDF(report: SummaryReport) {
 
     autoTable(doc, {
         startY: 52,
-        head: [['Zone Name', 'Land Use', 'Traffic', 'Population', 'Road Length', 'Est. AQI', 'Category']],
+        head: [['Zone Name', 'Land Use', 'Traffic', 'Population', 'Road Length', 'Estimated AQI', 'Category']],
         body: tableData,
         styles: {
             fontSize: 8,
@@ -365,7 +388,6 @@ async function exportPDF(report: SummaryReport) {
         doc.setPage(i)
         doc.setFontSize(7)
         doc.setTextColor(82, 82, 91)
-        doc.text('Educational simulation only. Not for regulatory use.', 14, 205)
         doc.text(`Page ${i} / ${pageCount}`, 270, 205)
     }
 

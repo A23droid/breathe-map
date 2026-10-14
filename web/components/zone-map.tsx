@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { useCity } from '@/context/CityContext'
 import { injectMissingGeometry, generateSinglePolygon } from '@/lib/generateZoneGeometry'
+import { cartoDarkTileUrl, CARTO_TILE_ATTRIBUTION } from '@/lib/cartoBasemap'
 
 // ─── FONT CONFIG ────────────────────────────────────────────────────────────
 // Edit these values to change fonts across all map UI (popup, legend, controls).
@@ -281,8 +282,8 @@ export default function ZoneMap({
       mapRef.current = map
 
       // Dark tile layer
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+      L.tileLayer(cartoDarkTileUrl(), {
+        attribution: CARTO_TILE_ATTRIBUTION,
         subdomains: 'abcd',
         maxZoom: 19,
       }).addTo(map)
