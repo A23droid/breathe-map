@@ -7,7 +7,6 @@ Estimate zone-level AQI, explore pollution patterns, run mitigation scenarios, a
 | | |
 |---|---|
 | **Live demo** | [breathe-map-w.vercel.app](https://breathe-map-w.vercel.app) |
-| **Upstream** | [a23droid/breathe-map](https://github.com/a23droid/breathe-map) |
 | **Product spec** | [PRD.md](./PRD.md) |
 | **Backend setup** | [web/SUPABASE_BACKEND_SETUP.md](./web/SUPABASE_BACKEND_SETUP.md) |
 
